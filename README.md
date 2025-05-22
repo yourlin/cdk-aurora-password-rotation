@@ -1,5 +1,7 @@
 # Aurora 全球数据库密码自动轮转 - CDK 部署方案
 
+中文 | [English](README_EN.md)
+
 这个 AWS CDK 项目用于自动部署一个解决方案，实现 Aurora 全球数据库的主用户密码自动轮转。由于 Aurora 全球数据库不支持原生的 `ManageMasterUserPassword` 功能，此解决方案通过 AWS Secrets Manager 和 Lambda 函数实现自定义密码轮转。
 
 ## 架构概述
@@ -14,6 +16,25 @@
 - **IAM 角色和策略**：提供必要的权限
 - **CloudWatch 告警**：监控密码轮转失败情况
 - **SNS 通知**：在密码轮转失败时发送邮件通知
+
+### 架构图
+
+```mermaid
+flowchart TD
+    User[用户应用] -->|读取凭证| SM[AWS Secrets Manager]
+    SM -->|存储凭证| Secret[(Aurora 凭证)]
+    SM -->|触发轮转| Lambda[Lambda 轮转函数]
+    Lambda -->|1. 创建新密码| Secret
+    Lambda -->|2. 更新数据库密码| AuroraPrimary[(Aurora 主集群)]
+    Lambda -->|3. 测试新密码| AuroraPrimary
+    Lambda -->|4. 完成轮转| Secret
+    AuroraPrimary -->|异步复制| AuroraSecondary[(Aurora 辅助集群)]
+    Lambda -->|使用| Layer[Lambda 层 PyMySQL]
+    CW[CloudWatch 告警] -->|监控| Lambda
+    CW -->|失败通知| SNS[SNS 通知]
+    SNS -->|发送邮件| Email[管理员邮箱]
+    Lambda -->|部署在| VPC[VPC]
+```
 
 ## 前提条件
 

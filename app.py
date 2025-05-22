@@ -252,22 +252,22 @@ class AuroraGlobalDbPasswordRotationStack(Stack):
         CfnOutput(
             self,
             "SecretArn",
-            description="Aurora 全球数据库凭证的 Secret ARN",
+            description="Secret ARN for Aurora Global Database credentials",
             value=secret.secret_arn,
         )
 
         CfnOutput(
             self,
             "LambdaFunctionName",
-            description="执行密码轮转的 Lambda 函数名称",
+            description="Lambda function name for password rotation",
             value=rotation_lambda.function_name,
         )
 
         CfnOutput(
             self,
             "SecretUpdateInstructions",
-            description="重要：请更新 Secret 中的数据库连接信息",
-            value=f"请访问 AWS Secrets Manager 控制台, 更新 {secret_name_param.value_as_string} 中的 host, username 和其他必要信息",
+            description="Important: Please update database connection information in Secret",
+            value=f"Please visit AWS Secrets Manager console to update host, username and other required information in {secret_name_param.value_as_string}",
         )
 
 
